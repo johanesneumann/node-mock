@@ -1,5 +1,6 @@
 const loaded = require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const proxy = require("express-http-proxy");
 const monk = require("monk");
 
@@ -14,6 +15,7 @@ const port = process.env.PORT || 3000;
 const proxyTo = process.env.PROXY_TO;
 
 const app = express();
+app.use(cors({ origin: process.env.CORS_ORIGIN }));
 // const router = express.Router();
 
 app.get("/api/tenants", async (req, res, next) => {
