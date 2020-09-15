@@ -1,15 +1,31 @@
 const loaded = require("dotenv").config();
-loaded.PROXY_TO;
-const { request } = require("express");
 const express = require("express");
 const proxy = require("express-http-proxy");
-const app = express();
+const monk = require("monk");
 
-app.get("/api/tenants", (req, res) => {
-  res.send("mock tenant");
-});
-app.use("/", proxy(process.env.PROXY_TO));
+const db = monk(process.env.MONGO_URI);
+const tenants = db.get("tenants");
+
+if (loaded.error) {
+  console.log("Error loading env:", loaded.error);
+}
 
 const port = process.env.PORT || 3000;
+const proxyTo = process.env.PROXY_TO;
+
+const app = express();
+// const router = express.Router();
+
+app.get("/api/tenants", async (req, res, next) => {
+  try {
+    const items = await tenants.find({});
+    res.json(items);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.use("/", proxy(proxyTo));
+
 app.listen(port);
 console.log(`Mock running on port ${port}`);
